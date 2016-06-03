@@ -6,7 +6,7 @@ using namespace std;
 
 int main()
 {
-    srand(time(NULL));
+    //srand(time(NULL));
     Graf G;
     //G.stworzGrafZPliku("wierzcholki.txt","wagi.txt");
     G.stworzGrafLosowy();

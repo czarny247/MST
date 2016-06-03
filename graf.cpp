@@ -2,23 +2,29 @@
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
-#include <algorithm> //std::min_element
+#include <algorithm> //std::min_element, std::random_shuffle
+#include <time.h>
+
+std::random_device Graf::rd;
+std::mt19937 Graf::mt(rd());
+std::uniform_int_distribution<int> Graf::dist(0,1);
 
 Graf::Graf()
     :gestoscGrafu(1)
 {
+    srand(time(NULL));
 }
 
 Graf::Graf(std::vector<Wierzcholek*> &w)
     :wierzcholki(w)
 {
-
+    srand(time(NULL));
 }
 
 Graf::Graf(double g)
     :gestoscGrafu(g)
 {
-
+    srand(time(NULL));
 }
 
 void Graf::stworzGrafZPliku(std::string nazwa1Pliku, std::string nazwa2Pliku)
@@ -143,6 +149,7 @@ void Graf::stworzGrafLosowy() //zadana gestosc oraz ilosc wierzcholkow, losowe p
     //nie zaimplementowales tego z powodu ograniczonego czasu
     std::cout << "Podaj gestosc grafu(100%->1): "; //zapobiec wprowadzeniom niepoprawnych danych
     std::cin >> gestoscGrafu;
+    if(gestoscGrafu>1.0) gestoscGrafu=1.0; //narazie zamiast obslugi wyjatku
     //tworzenie macierzy sasiedztwa
     int liczbaWierzcholkow = 0;
     std::cout << "Podaj liczbe wierzcholkow: ";
@@ -151,53 +158,114 @@ void Graf::stworzGrafLosowy() //zadana gestosc oraz ilosc wierzcholkow, losowe p
     //gestoscGrafu = liczbaKrawedzi/liczbaKrawedziMax
     int liczbaKrawedziMax = (liczbaWierzcholkow*(liczbaWierzcholkow-1))/2;
     int liczbaKrawedzi = gestoscGrafu*liczbaKrawedziMax;
+    std::cout << "\nliczbaKrawedzi: " << liczbaKrawedzi << std::endl;
     int licznikStworzonychKrawedzi = 0;
-
+    //std::vector<bool> v(liczbaWierzcholkow*liczbaWierzcholkow);
+    //std::fill(v.begin(), v.begin() + liczbaKrawedzi, 1);
+    //std::fill(v.begin() + (liczbaKrawedzi+1),v.end(),0);
+    //for(auto iv : v) std::cout << iv << std::endl;
     //tworzenie macierzy sasiedztwa - pozniej przeniesc do osobnej metody
     bool MS[liczbaWierzcholkow][liczbaWierzcholkow];
     std::fill(MS[0],MS[0] + liczbaWierzcholkow*liczbaWierzcholkow,0);
-    while(licznikStworzonychKrawedzi!=liczbaKrawedzi)
+    std::vector<bool> potencjalne(liczbaWierzcholkow*liczbaWierzcholkow);
+    std::fill(potencjalne.begin(),potencjalne.end(),0);
+    if(gestoscGrafu==1.0)
     {
-        for(int i = 0; i < liczbaWierzcholkow; ++i)
+        while(licznikStworzonychKrawedzi!=liczbaKrawedzi)
         {
-            for(int j = 0; j < liczbaWierzcholkow-1; ++j) //z kazdego w. maksymalnie W-1 krawedzi
+            for(int i = 0; i < liczbaWierzcholkow; ++i)
             {
-                if(i!=j) //wierzcholek nie sasiaduje ze soba...
+                for(int j = 0; j < liczbaWierzcholkow-1; ++j) //z kazdego w. maksymalnie W-1 krawedzi
                 {
+                    if(i!=j) //wierzcholek nie sasiaduje ze soba...
+                    {
                     //jesli gdzies nie ma krawedzi to probujemy ja wylosowac
                     //oraz jesli stworzonych krawedzi jest mniej niz ma byc
                     //oraz jesli dane sasiedztwo juz jest (tylko w druga strone)
-                    if(!MS[i][j] && licznikStworzonychKrawedzi<liczbaKrawedzi)
-                    {
-                        if(!MS[j][i]) MS[i][j] = bool(rand() % 2); //zeby nie powielac krawedzi
-                        if(MS[i][j]) ++licznikStworzonychKrawedzi;
+                        if(!MS[i][j] && licznikStworzonychKrawedzi<liczbaKrawedzi)
+                        {
+                            if(!MS[j][i]) MS[i][j] = true; //zeby nie powielac krawedzi
+                            if(MS[i][j]) ++licznikStworzonychKrawedzi; std::cout << licznikStworzonychKrawedzi << std::endl;
+                        }
                     }
+                    else MS[i][j] = false; //...dlatego wartosc jego sasiedztwa to false(0)
                 }
-                else MS[i][j] = false; //...dlatego wartosc jego sasiedztwa to false(0)
+            }
+        //std::cout << licznikStworzonychKrawedzi << std::endl;
+        }
+    }
+    else
+    {
+        int suma = 0;
+        while(suma<=liczbaKrawedzi)
+        {
+            //srand(time(NULL));
+            for(int i = 0; i < potencjalne.size(); ++i)
+            {
+                if(i % (liczbaWierzcholkow+1) != 0)
+                {
+                   potencjalne[i] = true;
+                   if(potencjalne[i] == true)
+                   {
+                       if(i*(liczbaWierzcholkow+1) < potencjalne.size()-1)
+                       {
+                           potencjalne[i*liczbaWierzcholkow] = true;
+                           //std::cout << i << " " << i*liczbaWierzcholkow << std::endl;
+                       }
+                       ++suma;
+                   }
+                }
             }
         }
-        //std::cout << licznikStworzonychKrawedzi << std::endl;
+
+        //std::cout << suma << std::endl;
+        //for(auto z : potencjalne) std::cout << " " << z;
+        int i = 0 , j = 0;
+        while(licznikStworzonychKrawedzi<liczbaKrawedzi)
+        {
+            //std::cout << (i*liczbaWierzcholkow)+j << std::endl;
+            if(potencjalne[(i*liczbaWierzcholkow)+j]==true)
+            {
+                MS[i][j] = rand() % 2;
+                //std::cout << MS[i][j] << std::endl;
+                if(MS[i][j]==true)
+                {
+                    ++licznikStworzonychKrawedzi;
+                    if(((i*liczbaWierzcholkow)+j)*liczbaWierzcholkow < (liczbaWierzcholkow*liczbaWierzcholkow))
+                    {
+                        potencjalne[(i*liczbaWierzcholkow)+j]=false;
+                    }
+                }
+            }
+            ++j;
+            if(j==liczbaWierzcholkow) ++i;
+            if(i==liczbaWierzcholkow) i = 0;
+            if(j==liczbaWierzcholkow) j = 0;
+            std::cout << licznikStworzonychKrawedzi << std::endl;
+        }
+
     }
 
-    //std::cout << "\n" << licznikStworzonychKrawedzi << ", " << liczbaKrawedzi << std::endl;
 
     //wyswietlanie macierzy sasiedztwa - bylo potrzebne do testow
-//    for(int i=0; i<liczbaWierzcholkow; ++i)
-//    {
-//        std::cout << "[" << i << "]";
-//    }
+    std::cout << "    ";
+    for(int i=0; i<liczbaWierzcholkow; ++i)
+    {
+        std::cout << "[" << i << "]";
+    }
 
-//    std::cout << std::endl;
+    std::cout << std::endl;
 
-//    for(int i=0; i<liczbaWierzcholkow; ++i)
-//    {
-//        for(int j=0; j<liczbaWierzcholkow; ++j)
-//        {
-//            std::cout << MS[i][j] << " ";
-//        }
+    for(int i=0; i<liczbaWierzcholkow; ++i)
+    {
+        std::cout << "[" << i << "] ";
+        for(int j=0; j<liczbaWierzcholkow; ++j)
+        {
+            std::cout << " " << MS[i][j] << " ";
+        }
 
-//        std::cout << std::endl;
-//    }
+        std::cout << std::endl;
+    }
     //tworzenie grafu na podstawie macierzy sasiedztwa
 
     for(int i = 0; i < liczbaWierzcholkow; ++i)
@@ -209,8 +277,8 @@ void Graf::stworzGrafLosowy() //zadana gestosc oraz ilosc wierzcholkow, losowe p
     {
         for(int j = 0; j < liczbaWierzcholkow; ++j)
         {
-            int w = rand() % 100 + 1;
-            if(MS[i][j]) krawedzie.push_back(new Krawedz(*wierzcholki[i],*wierzcholki[j],w));
+            int w = rand() % 100 + 1; //losowanie wagi
+            if(MS[i][j])krawedzie.push_back(new Krawedz(*wierzcholki[i],*wierzcholki[j],w));
         }
     }
 }

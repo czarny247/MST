@@ -3,6 +3,7 @@
 #include <vector>
 #include "krawedz.h"
 #include <string>
+#include <random>
 
 using krIt = std::vector<Krawedz*>::iterator;
 
@@ -13,6 +14,9 @@ private:
     std::vector<Wierzcholek*> wierzcholki;
     std::vector<Krawedz*> minimalneDrzewoRozpinajace;
     double gestoscGrafu;
+    static std::random_device rd;
+    static std::mt19937 mt;
+    static std::uniform_int_distribution<int> dist;
 public:
     Graf();
     Graf(std::vector<Wierzcholek*>& w);
