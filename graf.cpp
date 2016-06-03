@@ -5,9 +5,9 @@
 #include <algorithm> //std::min_element, std::random_shuffle
 #include <time.h>
 
-std::random_device Graf::rd;
-std::mt19937 Graf::mt(rd());
-std::uniform_int_distribution<int> Graf::dist(0,1);
+//std::random_device Graf::rd;
+//std::mt19937 Graf::mt(rd());
+//std::uniform_int_distribution<int> Graf::dist(0,1);
 
 Graf::Graf()
     :gestoscGrafu(1)
@@ -307,6 +307,43 @@ void Graf::algorytmPrima()
     }
 }
 
+void Graf::algorytmKruskala()
+{
+    std::sort(krawedzie.begin(),krawedzie.end(),[](Krawedz* a, Krawedz* b) -> bool
+    {
+        return a->zwrocWaga() < b->zwrocWaga();
+    });
+//    for(auto it = krawedzie.begin(); it != krawedzie.end(); ++it)
+//    {
+//        std::cout << **it << std::endl;
+//    }
+
+    auto it = krawedzie.begin();
+    while(minimalneDrzewoRozpinajace.size() < wierzcholki.size()-1)
+    {
+        Wierzcholek* wa = (*it)->getW1();
+        Wierzcholek* wb = (*it)->getW2();
+        if(!minimalneDrzewoRozpinajace.empty())
+        {
+            auto fit_a = std::find_if(minimalneDrzewoRozpinajace.begin(),minimalneDrzewoRozpinajace.end(),[&wa](Krawedz* ka)
+            {
+                return ((ka->getW1() == wa) || (ka->getW2() == wa));
+            });
+            auto fit_b = std::find_if(minimalneDrzewoRozpinajace.begin(),minimalneDrzewoRozpinajace.end(),[&wb](Krawedz* kb)
+            {
+                return ((kb->getW1() == wb) || (kb->getW2() == wb));
+            });
+
+            if(fit_a != minimalneDrzewoRozpinajace.end() && fit_b != minimalneDrzewoRozpinajace.end())
+            {
+                ++it;
+            }
+            else minimalneDrzewoRozpinajace.push_back((*it));
+        }
+        else minimalneDrzewoRozpinajace.push_back((*it));
+    }
+}
+
 Wierzcholek Graf::zwrocNastepny(std::vector<Wierzcholek*>& rozpatrzone, Krawedz* &k)
 {
     if(std::find(rozpatrzone.begin(),rozpatrzone.end(),k->getW1()) != rozpatrzone.end()) return Wierzcholek(*(k->getW2()));
@@ -332,7 +369,6 @@ void Graf::znajdzKrMin(std::vector<Wierzcholek*>& rozpatrzone, std::vector<Krawe
                 }
         }
     }
-
 
     std::cout << "Potencjalne:\n";
     for(auto it = potencjalne.begin(); it != potencjalne.end(); ++it)

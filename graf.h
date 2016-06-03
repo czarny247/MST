@@ -28,6 +28,7 @@ public:
     void dodajKrawedzie(std::vector<int>& wagi);
     void pokazGraf();
     void algorytmPrima();
+    void algorytmKruskala();
     void znajdzKrMin(std::vector<Wierzcholek*>& rozpatrzone, std::vector<Krawedz*>& krawedzie, Krawedz *&pMin);
     Wierzcholek zwrocNastepny(std::vector<Wierzcholek*>& rozpatrzone, Krawedz* &k);
     void pokazMDR();
