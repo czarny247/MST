@@ -298,13 +298,15 @@ void Graf::algorytmPrima()
     {
         znajdzKrMin(rozpatrzone,kr,k); //dziala dobrze
         //std::cout << **it_WierzAktual << std::endl;
-        minimalneDrzewoRozpinajace.emplace_back(k); //dziala dobrze
-        //for(auto k : kr) std::cout << *k << std::endl;
-        kr.erase(std::remove(kr.begin(),kr.end(),k),kr.end()); //dziala dobrze
-        //std::cout << "\npo usunieciu:\n";
-        //for(auto k : kr) std::cout << *k << std::endl;
+        minimalneDrzewoRozpinajace.push_back(new Krawedz(*k)); //dziala dobrze
+        for(auto it = kr.begin(); it != kr.end();)
+        {
+            if((**it) == (*k)) kr.erase(it++);
+            else ++it;
+        }
+
         std::cout << "Rozpatrzone:\n";
-        //for(auto r: rozpatrzone) std::cout << *r << std::endl;
+        for(auto r: rozpatrzone) std::cout << *r << std::endl;
     }
 }
 
@@ -348,8 +350,20 @@ void Graf::algorytmKruskala()
 
 Wierzcholek Graf::zwrocNastepny(std::vector<Wierzcholek*>& rozpatrzone, Krawedz* &k)
 {
-    if(std::find(rozpatrzone.begin(),rozpatrzone.end(),k->getW1()) != rozpatrzone.end()) return Wierzcholek(*(k->getW2()));
-    if(std::find(rozpatrzone.begin(),rozpatrzone.end(),k->getW2()) != rozpatrzone.end()) return Wierzcholek(*(k->getW1()));
+    Wierzcholek w;
+//    if(std::find(rozpatrzone.begin(),rozpatrzone.end(),*k->getW1()) != rozpatrzone.end()) w = *(k->getW2());
+//    if(std::find(rozpatrzone.begin(),rozpatrzone.end(),*k->getW2()) != rozpatrzone.end()) w = *(k->getW1());
+    for(auto const& vec : rozpatrzone)
+    {
+        if(*vec == (*(k->getW1()))) w = (*(k->getW2()));
+        if(*vec == (*(k->getW2()))) w = (*(k->getW1()));
+//        for(auto const& wr : vec)
+//        {
+//            if((*wr)==(*(k->getW1()))) w = (*(k->getW2()));
+//            if((*wr)==(*(k->getW2()))) w = (*(k->getW1()));
+//        }
+    }
+    return w;
 }
 
 void Graf::znajdzKrMin(std::vector<Wierzcholek*>& rozpatrzone, std::vector<Krawedz*>& krawedzie, Krawedz* &pMin) //ma zwrocic iterator do krMin
@@ -359,15 +373,15 @@ void Graf::znajdzKrMin(std::vector<Wierzcholek*>& rozpatrzone, std::vector<Krawe
     {
         for(auto ti = krawedzie.begin(); ti != krawedzie.end(); ++ti) //wybieramy potencjalne krawedzie tzn wychodza z/do w. rozpatrzonych
         {
-                if(((*ti)->getW1() == (*it)))
+                if((*(*ti)->getW1()) == (**it))
                 {
                     auto find_w2 = std::find(rozpatrzone.begin(),rozpatrzone.end(),(*ti)->getW2());
-                    if(find_w2 == rozpatrzone.end()) potencjalne.emplace_back(*ti);
+                    if(find_w2 == rozpatrzone.end()) potencjalne.push_back(new Krawedz(**ti));
                 }
-                if(((*ti)->getW2() == (*it)))
+                if((*(*ti)->getW2()) == (**it))
                 {
                     auto find_w1 = std::find(rozpatrzone.begin(),rozpatrzone.end(),(*ti)->getW1());
-                    if(find_w1 == rozpatrzone.end()) potencjalne.emplace_back(*ti);
+                    if(find_w1 == rozpatrzone.end()) potencjalne.push_back(new Krawedz(**ti));
                 }
         }
     }
@@ -383,11 +397,11 @@ void Graf::znajdzKrMin(std::vector<Wierzcholek*>& rozpatrzone, std::vector<Krawe
                         {return a->zwrocWaga() < b->zwrocWaga();});
 
     std::cout << "min: " << **min << std::endl;
-    //std::cout << "aktualny: " << *rozpatrzone.back() << std::endl;
-    Wierzcholek* nast = new Wierzcholek(zwrocNastepny(rozpatrzone,*min));
-    std::cout << "nastepny: " << *nast << std::endl;
-    auto it_find = std::find(rozpatrzone.begin(),rozpatrzone.end(),nast);
-    if(it_find==rozpatrzone.end()) rozpatrzone.emplace_back(new Wierzcholek(zwrocNastepny(rozpatrzone,*min)));
+    std::cout << "aktualny: " << *rozpatrzone.back() << std::endl;
+    Wierzcholek nast = zwrocNastepny(rozpatrzone,*min);
+    std::cout << "nastepny: " << nast << std::endl;
+    auto it_find = std::find(rozpatrzone.begin(),rozpatrzone.end(),&nast);
+    if(it_find==rozpatrzone.end()) rozpatrzone.push_back(new Wierzcholek(zwrocNastepny(rozpatrzone,*min)));
     pMin = *min;
 }
 

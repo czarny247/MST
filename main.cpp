@@ -11,9 +11,9 @@ int main()
     //G.stworzGrafZPliku("wierzcholki.txt","wagi.txt");
     G.stworzGrafLosowy();
     //G.pokazGraf();
-    //G.algorytmPrima();
+    G.algorytmPrima();
     //G.pokazMDR();
-    G.algorytmKruskala();
+    //G.algorytmKruskala();
     G.pokazMDR();
 //    vector<Graf*> Grafy;
 //    for(int i = 0; i < 100; ++i)
