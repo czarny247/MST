@@ -6,8 +6,8 @@ Krawedz::Krawedz()
 
 }
 
-Krawedz::Krawedz(Wierzcholek& orgW1, Wierzcholek& orgW2, int& w)
-    :w1(&orgW1),w2(&orgW2),waga(w), wDrzewie(false)
+Krawedz::Krawedz(Wierzcholek *orgW1, Wierzcholek *orgW2, int& w)
+    :w1(orgW1),w2(orgW2),waga(w), wDrzewie(false)
 {
 }
 

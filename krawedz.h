@@ -12,7 +12,8 @@ private:
 
 public:
     Krawedz();
-    Krawedz(Wierzcholek& orgW1, Wierzcholek& orgW2,int& w);
+    //Krawedz(Wierzcholek& orgW1, Wierzcholek& orgW2,int& w);
+    Krawedz(Wierzcholek* orgW1, Wierzcholek* orgW2,int& w);
     Krawedz(const Krawedz& orginalna);
     ~Krawedz();
 

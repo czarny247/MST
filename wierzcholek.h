@@ -7,9 +7,6 @@ class Wierzcholek
 private:
     int wX; //wspolrzedna X
     int wY; //wspolrzedna Y
-    bool wKrawedzi;
-    bool odwiedzony;
-    //static int licznik;
 
 public:
     Wierzcholek();
@@ -17,10 +14,6 @@ public:
     Wierzcholek(const Wierzcholek& orginalny);
     ~Wierzcholek();
 
-    bool zwrocCzyWkrawedzi() const;
-    void ustawCzyWkrawedzi(bool wk);
-    bool zwrocOdwiedzony() const;
-    void ustawOdwiedzony(bool o);
     int X() const {return wX;}
     int Y() const {return wY;}
 

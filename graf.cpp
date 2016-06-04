@@ -103,7 +103,7 @@ void Graf::dodajKrawedzie(std::vector<int>& wagi)
         for(int j = i+1; j < wierzcholki.size(); j++)
         {
             //std::cout << "[i=" << i << "][j=" << j << "],[w=" << w << "]" << std::endl;
-            krawedzie.push_back(new Krawedz(*wierzcholki[i],*wierzcholki[j],wagi[w]));
+            krawedzie.push_back(new Krawedz(new Wierzcholek(*wierzcholki[i]),new Wierzcholek(*wierzcholki[j]),w));
             w++;
         }
     }
@@ -158,7 +158,7 @@ void Graf::stworzGrafLosowy() //zadana gestosc oraz ilosc wierzcholkow, losowe p
     //gestoscGrafu = liczbaKrawedzi/liczbaKrawedziMax
     int liczbaKrawedziMax = (liczbaWierzcholkow*(liczbaWierzcholkow-1))/2;
     int liczbaKrawedzi = gestoscGrafu*liczbaKrawedziMax;
-    std::cout << "\nliczbaKrawedzi: " << liczbaKrawedzi << std::endl;
+    //std::cout << "\nliczbaKrawedzi: " << liczbaKrawedzi << std::endl;
     int licznikStworzonychKrawedzi = 0;
     //std::vector<bool> v(liczbaWierzcholkow*liczbaWierzcholkow);
     //std::fill(v.begin(), v.begin() + liczbaKrawedzi, 1);
@@ -185,7 +185,7 @@ void Graf::stworzGrafLosowy() //zadana gestosc oraz ilosc wierzcholkow, losowe p
                         if(!MS[i][j] && licznikStworzonychKrawedzi<liczbaKrawedzi)
                         {
                             if(!MS[j][i]) MS[i][j] = true; //zeby nie powielac krawedzi
-                            if(MS[i][j]) ++licznikStworzonychKrawedzi; std::cout << licznikStworzonychKrawedzi << std::endl;
+                            if(MS[i][j]) ++licznikStworzonychKrawedzi; //std::cout << licznikStworzonychKrawedzi << std::endl;
                         }
                     }
                     else MS[i][j] = false; //...dlatego wartosc jego sasiedztwa to false(0)
@@ -200,7 +200,8 @@ void Graf::stworzGrafLosowy() //zadana gestosc oraz ilosc wierzcholkow, losowe p
         while(suma<=liczbaKrawedzi)
         {
             //srand(time(NULL));
-            for(int i = 0; i < potencjalne.size(); ++i)
+            for(int i = 0; i < potencjalne.size(); ++i) //na przekatnej sa "false", poniewaz nie tworzymy petli
+            //np. nie mozemy stworzyc krawedzi [0]->[0]
             {
                 if(i % (liczbaWierzcholkow+1) != 0)
                 {
@@ -241,31 +242,31 @@ void Graf::stworzGrafLosowy() //zadana gestosc oraz ilosc wierzcholkow, losowe p
             if(j==liczbaWierzcholkow) ++i;
             if(i==liczbaWierzcholkow) i = 0;
             if(j==liczbaWierzcholkow) j = 0;
-            std::cout << licznikStworzonychKrawedzi << std::endl;
+            //std::cout << licznikStworzonychKrawedzi << std::endl;
         }
 
     }
 
 
     //wyswietlanie macierzy sasiedztwa - bylo potrzebne do testow
-    std::cout << "    ";
-    for(int i=0; i<liczbaWierzcholkow; ++i)
-    {
-        std::cout << "[" << i << "]";
-    }
+//    std::cout << "    ";
+//    for(int i=0; i<liczbaWierzcholkow; ++i)
+//    {
+//        std::cout << "[" << i << "]";
+//    }
 
-    std::cout << std::endl;
+//    std::cout << std::endl;
 
-    for(int i=0; i<liczbaWierzcholkow; ++i)
-    {
-        std::cout << "[" << i << "] ";
-        for(int j=0; j<liczbaWierzcholkow; ++j)
-        {
-            std::cout << " " << MS[i][j] << " ";
-        }
+//    for(int i=0; i<liczbaWierzcholkow; ++i)
+//    {
+//        std::cout << "[" << i << "] ";
+//        for(int j=0; j<liczbaWierzcholkow; ++j)
+//        {
+//            std::cout << " " << MS[i][j] << " ";
+//        }
 
-        std::cout << std::endl;
-    }
+//        std::cout << std::endl;
+//    }
     //tworzenie grafu na podstawie macierzy sasiedztwa
 
     for(int i = 0; i < liczbaWierzcholkow; ++i)
@@ -278,7 +279,7 @@ void Graf::stworzGrafLosowy() //zadana gestosc oraz ilosc wierzcholkow, losowe p
         for(int j = 0; j < liczbaWierzcholkow; ++j)
         {
             int w = rand() % 100 + 1; //losowanie wagi
-            if(MS[i][j])krawedzie.push_back(new Krawedz(*wierzcholki[i],*wierzcholki[j],w));
+            if(MS[i][j])krawedzie.push_back(new Krawedz(new Wierzcholek(*wierzcholki[i]),new Wierzcholek(*wierzcholki[j]),w));
         }
     }
 }
@@ -303,7 +304,7 @@ void Graf::algorytmPrima()
         //std::cout << "\npo usunieciu:\n";
         //for(auto k : kr) std::cout << *k << std::endl;
         std::cout << "Rozpatrzone:\n";
-        for(auto r: rozpatrzone) std::cout << *r << std::endl;
+        //for(auto r: rozpatrzone) std::cout << *r << std::endl;
     }
 }
 
@@ -323,6 +324,7 @@ void Graf::algorytmKruskala()
     {
         Wierzcholek* wa = (*it)->getW1();
         Wierzcholek* wb = (*it)->getW2();
+
         if(!minimalneDrzewoRozpinajace.empty())
         {
             auto fit_a = std::find_if(minimalneDrzewoRozpinajace.begin(),minimalneDrzewoRozpinajace.end(),[&wa](Krawedz* ka)
@@ -338,9 +340,9 @@ void Graf::algorytmKruskala()
             {
                 ++it;
             }
-            else minimalneDrzewoRozpinajace.push_back((*it));
+            else minimalneDrzewoRozpinajace.push_back(new Krawedz(**it));
         }
-        else minimalneDrzewoRozpinajace.push_back((*it));
+        else minimalneDrzewoRozpinajace.push_back(new Krawedz(**it));
     }
 }
 
